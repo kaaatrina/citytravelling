@@ -1210,8 +1210,40 @@
   var cardEdits = {};
   try { cardEdits = JSON.parse(localStorage.getItem(CARD_EDIT_KEY) || "{}"); }
   catch (err) { cardEdits = {}; }
+  // 固化进 HTML 的默认背面文字（来自你本地浏览器导出的编辑内容）。
+  // 浏览器 localStorage 里若有你的新编辑，仍会优先；否则回退到这里，保证部署后文字不丢。
+  var DEFAULT_CARD_EDITS = {
+  "pop-music-center::0": "<div class=\"b-title\">台北流行音乐中心</div><font color=\"#b83f5a\"><span style=\"font-size: 12.5px;\">如果世界太危险，只有音乐最安全</span></font><br><div class=\"b-row\"><b>🚇</b> 捷运板南线「昆阳站」</div><div class=\"b-row\"><b>🕐</b> ：每日10:00-18:00（週一公休）</div><div class=\"b-row\"><b>💭</b> 入场时会发自动语音导览设备，可以自动根据所在位置播放相应的歌曲和讲解，也可以手动输入览厅编号播放</div><div class=\"b-row\"><b>💰</b> 门票NT$350（有学生优惠，无需预约现场买票，售票处旁边就是检票口，入场时会在手上盖一个小印章，凭小印章可反复入场）</div>",
+  "palace::0": "<div class=\"b-title\">国立故宫博物院</div><div class=\"b-type\">景点</div><div class=\"b-row\"><b>🚇</b> 捷运淡水信义线「士林站」1号口出来，换乘957/30/255/304/小18/815公交直达故宫博物院站</div><div class=\"b-row\"><b>🕐</b> 9:00–17:00；周五、周六延长至21:00</div><div class=\"b-row\"><b>💭</b> 一器一物，都是跨越时光的浪漫</div><div class=\"b-row\"><b>💰</b> 门票 NT$350</div>",
+  "palace::2": "<div class=\"b-title\">国立故宫博物院</div><div class=\"b-type\">文创</div><div class=\"b-row\"><b>💭</b> 有新意、有创意，覆盖文具、摆件、日用品等多个品类。必须捂紧钱包！</div>",
+  "palace::1": "<div class=\"b-title\">翠玉白菜</div><font color=\"#b83f5a\"><span style=\"font-size: 12.5px;\">珍藏艺术品</span></font><div class=\"b-row\"><b>💭</b> 翠玉白菜是清代宫廷旧藏的翡翠巧雕，工匠利用玉料天然的白绿颜色，把白色雕成菜梗、绿色雕成菜叶，又把裂纹和杂质变成白菜的真实纹理。寓意纯洁、丰收与聚财。</div>",
+  "palace::3": "<div class=\"b-title\">纪念门票</div><div class=\"b-row\"><b>💭</b> 十分有巧思，每一张门票上的图案都是不同的国宝，具有纪念意义。</div>",
+  "pop-music-center::6": "<div class=\"b-title\">台北流行音乐中心</div><div class=\"b-row\"><b>💭</b> 「仔細聆聽 你一定會在這裡找到自己的故事」</div>",
+  "pop-music-center::4": "<div class=\"b-title\">台北流行音乐中心</div><div class=\"b-type\">展览 · 景点</div><div class=\"b-row\"><b>💭</b></div><div class=\"b-row\">台湾流行乐真的是全宇宙独一份的天菜！🩷</div>",
+  "pop-music-center::3": "<div class=\"b-title\">台北流行音乐中心</div><div class=\"b-type\">展览 · 景点</div><div class=\"b-row\"><b>💭</b>  展馆陈列了很多台湾歌手的物品。带上耳机后，只想沉浸式的享受这片刻的美好🎧</div><div class=\"b-row\"><br></div>",
+  "pop-music-center::1": "<div class=\"b-title\">台北流行音乐中心</div><div class=\"b-type\">展览 · 景点</div><div class=\"b-row\"><b>💭</b> 可以说是迄今为止看最有巧思的一场展览！</div>",
+  "pop-music-center::5": "<div class=\"b-title\">台北流行音乐中心</div><div class=\"b-type\">展览 · 景点</div><div class=\"b-row\"><b>💭</b> <span style=\"background-color: rgba(227, 109, 132, 0.12);\">每到一个展区耳边都会响起熟悉的声音：</span></div><div class=\"b-row\">“嗨，我是王力宏”</div><div class=\"b-row\">“嗨，我是五月天阿信”</div><div class=\"b-row\">“嗨，我是陈绮贞，青春的你还好吗？”…</div>",
+  "pop-music-center::2": "<div class=\"b-title\">台北流行音乐中心</div><div class=\"b-type\">展览 · 景点</div><div class=\"b-row\"><b>💭</b> 看到了很多歌曲的手稿 <span style=\"background-color: rgb(255, 249, 240);\">：</span><span style=\"background-color: rgba(227, 109, 132, 0.12);\">想见你 飞机场的10:30…</span></div><div class=\"b-row\">最后在感谢名单里看到好多熟悉的歌星名字</div><div class=\"b-row\"><br></div><div class=\"b-row\"><br></div>",
+  "jiajia-records::1": "<div class=\"b-title\">佳佳唱片行</div><div class=\"b-type\">唱片行 ·景点</div><div class=\"b-row\"><b>💭</b> 唱片店里的时间，好像真的走得慢一点...</div>",
+  "jiajia-records::3": "<div class=\"b-title\">佳佳唱片行</div><div class=\"b-type\">唱片行 · 景点</div><div class=\"b-row\"><b>💭</b> 此行放了行李第一站就直奔唱片行，逛了2个多小时，经历无数次的纠结最终选出来5张神专美美购入：</div><div class=\"b-row\">陶喆——黑色柳丁</div><div class=\"b-row\">陶喆——I'M OK</div><div class=\"b-row\">卢广仲——大人中</div><div class=\"b-row\">卢广仲——鱼仔</div><div class=\"b-row\">卢广仲——几分之几</div>",
+  "jiajia-records::0": "<div class=\"b-title\">佳佳唱片行</div><div class=\"b-type\">唱片行 · 景点</div><div class=\"b-row\"><b>🚇</b> 捷运板南线／松山新店线「西门站」6号出口，步行约5分钟</div><div class=\"b-row\"><b>🕐</b> 10:00-22:00</div>",
+  "jiajia-records::2": "<div class=\"b-title\">佳佳唱片行</div><div class=\"b-type\">唱片行 · 景点</div><div class=\"b-row\"><b>💭</b> “在我的时代 还有唱片行<span style=\"background-color: rgb(255, 249, 240);\"> </span><span style=\"background-color: rgba(227, 109, 132, 0.12);\">如同博物馆装满了希望”</span></div>",
+  "ntu::0": "<div class=\"b-title\">台湾大学</div><div class=\"b-type\">校园 · 景点</div><div class=\"b-row\"><b>🚇</b> 捷运松山新店线「公馆站」</div><div class=\"b-row\"><b>🕐</b> 白天</div><div class=\"b-row\"><b>💭</b> 「 历史感的建筑，热烈的阳光，斑驳的树影，好像又回到了那个什么都不用焦虑的夏天」</div><div class=\"b-row\"><b>💰</b> 免费</div>",
+  "ntu::1": "<div class=\"b-title\">台湾大学</div><div class=\"b-type\">校园 · 景点</div><div class=\"b-row\"><b>💭我们不要在这里，</b></div><div class=\"b-row\"><b>   跟我回去18岁，</b></div><div class=\"b-row\"><b>   躲到台大校园杜鹃花丛下，</b></div><div class=\"b-row\"><b>   不要被命运找到</b></div>",
+  "ntu::2": "<div class=\"b-title\">台湾大学</div><div class=\"b-type\">校园 · 景点</div>",
+  "ntu::3": "<div class=\"b-title\">台湾大学校园文创商店</div><div class=\"b-type\">校园 · 景点</div><div class=\"b-row\"><b>💭</b> 好的大学拥有自己的文创商店！</div>",
+  "ntu::5": "<div class=\"b-title\">台湾大学</div><div class=\"b-type\">校园 · 景点</div><div class=\"b-row\"><b>💭在校园漫步，就这样回到18岁</b></div><div class=\"b-row\"><br></div>",
+  "ntu::4": "<div class=\"b-title\">台湾大学</div><div class=\"b-type\">校园 · 景点</div><div class=\"b-row\"><b>💭</b> 在台大喝自家农场产的台大牛奶～（梦回cityu了）</div>",
+  "jiufen-shifen::0": "<div class=\"b-title\">九份 · 十分</div><div class=\"b-type\">景点</div><div class=\"b-row\"><b>🚇</b> 台铁到瑞芳，九份转公车 / 十分走平溪线</div><div class=\"b-row\"><b>🕐</b> 白天十分放天灯，再到九份看日落赏夜景</div><div class=\"b-row\"><b>💭「所愿皆成」</b></div><div class=\"b-row\"><b>💰</b> 交通 + 天灯约 NT$400</div>",
+  "jiufen-shifen::2": "<div class=\"b-title\">十分</div><div class=\"b-type\">景点</div>",
+  "jiufen-shifen::4": "<div class=\"b-title\">十分车站</div><div class=\"b-type\">景点</div>",
+  "jiufen-shifen::1": "<div class=\"b-title\">十分放天灯</div><font color=\"#b83f5a\"><span style=\"font-size: 12.5px;\">活动</span></font><div><b style=\"font-size: 14px;\">💭</b><span style=\"background-color: rgba(227, 109, 132, 0.12); font-size: 14px;\"> 其实也没有很贪心，只是在八色天灯上写满了愿望罢了！</span><div class=\"b-row\"><br></div></div>",
+  "jiufen-shifen::3": "<div class=\"b-title\">十分车站</div><div class=\"b-type\">美食</div><div class=\"b-row\"><b>💭</b> 火车铁轨旁有很多家文创店、小吃店，最推荐的是「香菜花生冰淇淋卷」（以为会很黑暗，实际上还不错～😋</div><div class=\"b-row\"><br></div>"
+};
+
   function getCardHTML(key) {
-    return typeof cardEdits[key] === "string" ? cardEdits[key] : null;
+    if (typeof cardEdits[key] === "string") return cardEdits[key];
+    return typeof DEFAULT_CARD_EDITS[key] === "string" ? DEFAULT_CARD_EDITS[key] : null;
   }
   function saveCardHTML(key, html) {
     cardEdits[key] = html;
