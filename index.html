@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城市漫游指南 · 台北漫游手帐</title>
+<style>
+  :root {
+    --pink-bg: #F0B3AE;
+    --paper: #FFF1E4;
+    --ink: #4D2932;
+    --muted: #8F5C65;
+    --pink: #E36D84;
+    --pink-deep: #B83F5A;
+    --green: #88B98C;
+    --green-deep: #4F7861;
+    --mint: #AFD9CF;
+    --line: #CD7078;
+    --sand: #F0C477;
+    --clay: #B55F52;
+    --serif: "Georgia", "Songti SC", "STSong", "Noto Serif SC", serif;
+    --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255,242,228,.68), transparent 24%),
+      radial-gradient(circle at 90% 18%, rgba(210,101,109,.25), transparent 30%),
+      radial-gradient(circle, rgba(77,41,50,.09) 1.05px, transparent 1.35px) 0 0 / 22px 22px,
+      var(--pink-bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.no-scroll { overflow: hidden; }
+  body.landing { overflow: hidden; }
+
+  /* ===== 开屏 ===== */
+  .map-hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px 46px;
+    text-align: center;
+  }
+  .map-hero .kicker {
+    display: inline-block;
+    padding: 4px 12px 3px;
+    border: 2px solid var(--ink);
+    border-radius: 4px 10px 5px 9px;
+    background: var(--sand);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: rotate(-1.4deg);
+  }
+  .map-hero h1 {
+    margin-top: 13px;
+    font-family: var(--serif);
+    font-size: clamp(36px, 6vw, 62px);
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: var(--ink);
+    text-shadow: 2px 2px 0 var(--paper), 5px 5px 0 rgba(255,241,228,.75);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .map-hero h1:focus-visible { outline: 3px dashed var(--pink-deep); outline-offset: 10px; border-radius: 8px; }
+  body.landing .map-hero {
+    position: relative;
+    justify-content: center;
+    overflow: hidden;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 50% 44%, rgba(255,246,235,.94) 0 18%, transparent 50%),
+      radial-gradient(circle at 78% 18%, rgba(227,109,132,.28), transparent 25%),
+      linear-gradient(145deg, rgba(255,255,255,.2), transparent 48%);
+  }
+  body.landing .map-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(73deg, transparent 0 28px, rgba(77,41,50,.06) 29px 30px),
+      radial-gradient(circle, rgba(77,41,50,.13) 1px, transparent 1.25px) 0 0 / 16px 16px;
+    mask-image: radial-gradient(circle at center, transparent 8%, #000 78%);
+    -webkit-mask-image: radial-gradient(circle at center, transparent 8%, #000 78%);
+    pointer-events: none;
+  }
+  body.landing .hero-title {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+    font-size: clamp(62px, 11vw, 138px);
+    line-height: .79;
+    letter-spacing: 0;
+    transform: rotate(-1.4deg);
+    width: min(100%, 1100px);
+  }
+  .hero-title .title-line { display: inline; }
+  body.landing .title-line {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(3px, .8vw, 11px);
+    white-space: nowrap;
+  }
+  body.landing .title-line-first { transform: translateX(-7vw) rotate(-2deg); }
+  body.landing .title-line-second { margin-top: clamp(9px, 2.2vh, 22px); transform: translateX(7vw) rotate(1.5deg); }
+  body.landing .char-1 { font-size: 1.16em; }
+  body.landing .char-2 { font-size: .73em; margin-bottom: .16em; }
+  body.landing .char-3 { font-size: .76em; margin-bottom: .12em; }
+  body.landing .char-4 { font-size: 1.28em; }
+  body.landing .char-5 { font-size: .68em; margin-bottom: .2em; }
+  body.landing .char-6 { font-size: 1.04em; }
+  body.landing .kicker,
+  body.landing .subtitle,
+  body.landing .map-viewport,
+  body.landing .map-hint,
+  body.landing footer { display: none; }
+  body:not(.landing) .landing-only { display: none !important; }
+
+  .landing-meta {
+    position: absolute;
+    z-index: 2;
+    top: clamp(18px, 4vh, 42px);
+    left: 4vw;
+    right: 4vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .landing-meta .meta-block { display: grid; gap: 2px; text-align: left; }
+  .landing-meta .meta-block:last-child { text-align: right; }
+  .landing-meta small { font-size: 9px; letter-spacing: .12em; opacity: .72; }
+  .landing-pencil {
+    position: absolute;
+    z-index: 2;
+    top: 18%;
+    right: 8vw;
+    width: 120px;
+    height: 46px;
+    border-top: 2px dashed var(--pink-deep);
+    transform: rotate(11deg);
+    opacity: .58;
+    pointer-events: none;
+  }
+  .landing-pencil::after {
+    content: "→";
+    position: absolute;
+    right: -4px;
+    top: -18px;
+    color: var(--pink-deep);
+    font: 25px var(--serif);
+  }
+  .landing-copy {
+    position: absolute;
+    z-index: 3;
+    right: 8vw;
+    top: 60%;
+    width: min(260px, 28vw);
+    color: var(--ink);
+    text-align: left;
+    transform: rotate(2deg);
+    pointer-events: none;
+  }
+  .landing-copy strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: clamp(18px, 2.1vw, 28px);
+    line-height: 1.25;
+  }
+  .landing-copy span {
+    display: block;
+    margin-top: 8px;
+    color: #7C525A;
+    font-size: 12px;
+    letter-spacing: .12em;
+  }
+  .landing-click {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    bottom: calc(clamp(28px, 5vh, 50px) + 152px);
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 15px 6px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: var(--sand);
+    box-shadow: 3px 3px 0 var(--ink);
+    color: var(--ink);
+    font: 700 13px var(--sans);
+    letter-spacing: .14em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .landing-click::after { content: "→"; font-size: 18px; transform: rotate(-8deg); }
+  .landing-stamp {
+    position: absolute;
+    z-index: 2;
+    top: 18%;
+    left: 8vw;
+    display: grid;
+    place-items: center;
+    width: 82px;
+    height: 82px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--pink);
+    color: var(--paper);
+    box-shadow: 4px 4px 0 var(--ink);
+    font: 700 13px/1.25 var(--serif);
+    letter-spacing: .12em;
+    text-align: center;
+    transform: rotate(-10deg);
+    pointer-events: none;
+  }
+  .landing-stamp::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed rgba(255,241,228,.72);
+    border-radius: 50%;
+  }
+  .landing-city {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 30vh;
+    opacity: .88;
+    pointer-events: none;
+  }
+  .escape-progress {
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    bottom: clamp(28px, 5vh, 50px);
+    width: min(920px, 88vw);
+    transform: translateX(-50%) rotate(-.35deg);
+    pointer-events: none;
+  }
+  .escape-progress-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 39px 8px;
+    color: var(--ink);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .escape-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .escape-progress-row > span {
+    flex: none;
+    width: 31px;
+    color: var(--ink);
+    font: 700 11px var(--sans);
+    text-align: center;
+  }
+  .escape-progress-track {
+    position: relative;
+    flex: 1;
+    height: 30px;
+    border: 3px solid var(--ink);
+    border-radius: 9px 14px 8px 12px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), rgba(77,41,50,.16) calc(25% - 1px) 25%),
+      rgba(255,245,232,.75);
+    box-shadow: 4px 4px 0 rgba(77,41,50,.88);
+    overflow: visible;
+  }
+  .escape-progress-fill {
+    position: absolute;
+    inset: 3px;
+    border-radius: 4px 9px 4px 7px;
+    background:
+      repeating-linear-gradient(130deg, rgba(255,255,255,.2) 0 8px, transparent 8px 16px),
+      linear-gradient(90deg, var(--pink), #E98AA0 52%, var(--sand));
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: progressFill 9s linear infinite;
+  }
+  .escape-runner {
+    position: absolute;
+    z-index: 4;
+    left: 0;
+    bottom: 20px;
+    width: 142px;
+    height: 106px;
+    animation: progressRunner 9s linear infinite;
+    pointer-events: none;
+  }
+  .escape-runner svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(3px 4px 0 rgba(77,41,50,.2)); }
+  .escape-runner .runner-bubble {
+    position: absolute;
+    left: 91px;
+    top: 2px;
+    padding: 4px 9px;
+    border: 2px solid var(--ink);
+    border-radius: 10px 10px 10px 2px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 700 12px var(--serif);
+    white-space: nowrap;
+    transform: rotate(4deg);
+  }
+  .runner-leg-front,
+  .runner-leg-back,
+  .runner-free-arm {
+    transform-box: view-box;
+  }
+  .runner-leg-front {
+    transform-origin: 78px 82px;
+    animation: runnerStepFront .82s ease-in-out infinite;
+  }
+  .runner-leg-back {
+    transform-origin: 71px 82px;
+    animation: runnerStepBack .82s ease-in-out infinite;
+  }
+  .runner-free-arm {
+    transform-origin: 65px 61px;
+    animation: runnerArmSwing .82s ease-in-out infinite;
+  }
+  @keyframes progressFill {
+    0%, 7% { transform: scaleX(0); }
+    94%, 100% { transform: scaleX(1); }
+  }
+  @keyframes progressRunner {
+    0%, 7% { left: 0; }
+    94%, 100% { left: calc(100% - 142px); }
+  }
+  @keyframes runnerStepFront {
+    0%, 100% { transform: rotate(-14deg); }
+    50% { transform: rotate(14deg); }
+  }
+  @keyframes runnerStepBack {
+    0%, 100% { transform: rotate(14deg); }
+    50% { transform: rotate(-14deg); }
+  }
+  @keyframes runnerArmSwing {
+    0%, 100% { transform: rotate(10deg); }
+    50% { transform: rotate(-14deg); }
+  }
+  @keyframes landingBreath {
+    0%,100% { transform: translateX(-50%) rotate(-1deg); }
+    50% { transform: translateX(-50%) translateY(-3px) rotate(1deg); }
+  }
+  body.landing .landing-click { animation: landingBreath 2.8s ease-in-out infinite; }
+  .map-hero h1 .title-char {
+    display: inline-block;
+    transform-origin: 50% 82%;
+    transition: transform .09s linear, color .18s ease;
+    will-change: transform;
+  }
+  .map-hero h1 .title-char.is-near { position: relative; z-index: 1; color: var(--pink-deep); }
+  .map-hero .subtitle {
+    margin-top: 4px;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .14em;
+  }
+
+  .map-viewport {
+    width: min(1200px, 96vw);
+    margin-top: 26px;
+    animation: mapReveal .72s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes mapReveal {
+    from { opacity: 0; transform: translateY(20px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .map-canvas {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    margin-top: 0;
+    border: 3px solid var(--ink);
+    border-radius: 18px 30px 16px 26px / 28px 17px 31px 20px;
+    overflow: hidden;
+    background: var(--paper);
+    box-shadow: 8px 8px 0 var(--ink), 15px 15px 0 rgba(184,63,90,.36);
+    transform: rotate(-.22deg);
+    isolation: isolate;
+  }
+  .clean-map-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    filter: saturate(1.04) contrast(.98);
+    background: var(--paper);
+    z-index: 0;
+  }
+  .map-annotations {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .map-canvas::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 0 46px rgba(117,76,76,.16);
+    background: radial-gradient(circle at 53% 48%, transparent 42%, rgba(240,187,177,.13) 100%);
+  }
+  .map-credit,
+  .map-scale {
+    position: absolute;
+    z-index: 3;
+    bottom: 14px;
+    padding: 5px 9px;
+    border: 1px solid rgba(77,41,50,.5);
+    border-radius: 5px;
+    background: rgba(255,248,239,.88);
+    color: #65454b;
+    font-size: 10px;
+    line-height: 1.4;
+    letter-spacing: .02em;
+    pointer-events: none;
+  }
+  .map-credit { left: 14px; }
+  .map-credit b { color: var(--ink); }
+  .map-key {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 3;
+    display: flex;
+    gap: 12px;
+    padding: 5px 9px;
+    border: 1px solid rgba(77,41,50,.5);
+    border-radius: 5px;
+    background: rgba(255,248,239,.9);
+    color: #65454b;
+    font-size: 10px;
+    pointer-events: none;
+  }
+  .map-key span { display: inline-flex; align-items: center; gap: 5px; }
+  .map-key i { display: inline-block; width: 18px; height: 4px; border-radius: 3px; }
+  .map-key .key-water { background: #7ACBCC; box-shadow: 0 0 0 1px #563D42; }
+  .map-key .key-road { background: #F1C25C; box-shadow: 0 0 0 1px #563D42; }
+  .map-scale {
+    right: 14px;
+    width: 25.9%;
+    min-width: 140px;
+    max-width: 310px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .map-scale i {
+    flex: 1;
+    display: block;
+    height: 7px;
+    border: solid var(--ink);
+    border-width: 0 1px 2px;
+  }
+  .transit-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .transit-route,
+  .transit-route-shadow {
+    fill: none;
+    stroke-linecap: round;
+    opacity: 0;
+    transition: opacity .18s ease;
+  }
+  .transit-route-shadow { stroke: #FFF7E8; stroke-width: 9; }
+  .transit-route {
+    stroke: #C98726;
+    stroke-width: 3.4;
+    stroke-dasharray: 7 9;
+    animation: transitDash 1.2s linear infinite;
+  }
+  .transit-layer.is-visible .transit-route,
+  .transit-layer.is-visible .transit-route-shadow { opacity: 1; }
+  @keyframes transitDash { to { stroke-dashoffset: -16; } }
+
+  .station-marker {
+    position: absolute;
+    width: 0;
+    height: 0;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .station-marker .station-person {
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+    width: 52px;
+    height: 70px;
+    transform: translateX(-50%);
+    filter: drop-shadow(3px 4px 0 rgba(77,41,50,.24));
+    animation: stationBob 2.6s ease-in-out infinite;
+  }
+  .station-marker .station-dot {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--sand);
+    box-shadow: 2px 2px 0 var(--paper);
+  }
+  .station-marker .station-label {
+    position: absolute;
+    left: 0;
+    top: -14px;
+    padding: 3px 9px;
+    border: 2px solid var(--ink);
+    border-radius: 6px 10px 7px 9px;
+    background: var(--paper);
+    color: var(--ink);
+    font: 700 12px var(--serif);
+    letter-spacing: .06em;
+    white-space: nowrap;
+    box-shadow: 2px 2px 0 var(--ink);
+    transform: translateX(-50%);
+  }
+  @keyframes stationBob {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
+  }
+
+  .moving-transit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    width: 58px;
+    height: 58px;
+    opacity: 0;
+    pointer-events: none;
+    filter: drop-shadow(3px 4px 0 rgba(77,41,50,.24));
+    transition: opacity .16s ease;
+    will-change: transform;
+  }
+  .moving-transit svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .moving-transit.is-visible { opacity: 1; }
+  .moving-transit.is-arrived { animation: transitArrive .42s ease-in-out infinite alternate; }
+  @keyframes transitArrive {
+    from { margin-top: 0; }
+    to { margin-top: -5px; }
+  }
+
+  /* 珍珠奶茶图标 + 标签 */
+  .marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .marker .boba {
+    position: absolute;
+    left: 0;
+    bottom: 10px;
+    width: 62px;
+    height: 86px;
+    transform: translateX(-50%);
+    filter: drop-shadow(3px 4px 0 rgba(77,41,50,.24));
+    transition: transform .25s ease;
+    animation: bob 3s ease-in-out infinite;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  @keyframes bob {
+    0%,100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, -4px); }
+  }
+  .marker:hover .boba { transform: translateX(-50%) scale(1.12); animation-play-state: paused; }
+  .marker.marker-jiajia .boba { left: 0; top: 12px; bottom: auto; }
+  .marker.marker-jiajia .m-label { left: 0; top: 104px; transform: translateX(-50%); font-size: 14px; padding: 3px 10px; }
+  .marker.marker-low .boba { left: 28px; }
+  .marker.marker-low .m-label { left: 32px; top: -8px; transform: none; }
+  .marker .spot-dot {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--pink-deep);
+    box-shadow: 2px 2px 0 var(--paper);
+    pointer-events: auto;
+  }
+  .marker .m-label {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    transform: translateX(-50%);
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    color: var(--ink);
+    background: var(--sand);
+    border: 2px solid var(--ink);
+    border-radius: 8px 14px 9px 12px;
+    padding: 4px 14px;
+    white-space: nowrap;
+    box-shadow: 3px 3px 0 var(--ink);
+    rotate: -1deg;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .marker.marker-label-right .m-label {
+    left: 14px;
+    transform: none;
+    text-align: left;
+  }
+
+  /* 悬停扇出缩略图 */
+  .fan { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+  .fan-gallery {
+    position: absolute;
+    display: grid;
+    gap: 16px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(.96);
+    transition: opacity .18s ease, transform .2s ease;
+  }
+  .fan.show .fan-gallery { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  .fan .thumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    padding: 6px 6px 25px;
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    background: #FFFDF7;
+    box-shadow: 3px 4px 0 rgba(77,41,50,.72);
+  }
+
+  .map-hint {
+    margin-top: 30px;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .1em;
+  }
+  .map-hint b {
+    padding: 1px 5px;
+    color: var(--ink);
+    background: linear-gradient(transparent 45%, var(--sand) 45% 88%, transparent 88%);
+  }
+
+  footer { border-top: 2px dashed var(--line); padding: 28px 24px; text-align: center; color: var(--ink); font-size: 13px; letter-spacing: .08em; }
+
+  /* ===== 思维导图浮层（翻页卡片） ===== */
+  .mindmap { position: fixed; inset: 0; z-index: 2000; display: none; }
+  .mindmap.open { display: block; }
+  .mm-backdrop { position: absolute; inset: 0; background: rgba(58,38,46,.72); backdrop-filter: blur(4px); }
+  .mm-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+  .mm-gallery {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+  .mm-gallery .flipcard {
+    position: absolute;
+    flex: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transform-origin: center;
+  }
+  .mm-gallery #mm-center { width: clamp(320px, 42vw, 540px); }
+  .mm-gallery .mm-node { width: clamp(180px, 22vw, 260px); }
+  .mm-gallery.is-grid {
+    top: 108px;
+    right: 4vw;
+    bottom: 24px;
+    left: 4vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: flex-start;
+    gap: 48px 18px;
+    padding: 8px 14px 86px;
+    overflow-y: auto;
+  }
+  .mm-gallery.is-grid .flipcard {
+    position: relative;
+    transform: none;
+  }
+  .mm-svg line { stroke: var(--green); stroke-width: 1.6; stroke-dasharray: 5 6; opacity: .7; }
+
+  .mm-close {
+    position: absolute; top: 22px; right: 22px; z-index: 7;
+    width: 42px; height: 42px; border: 1px solid rgba(255,246,248,.6);
+    background: rgba(74,59,63,.5); color: #FFF6F8; font-size: 20px;
+    border-radius: 50%; cursor: pointer; transition: background .2s ease;
+  }
+  .mm-close:hover { background: var(--pink); border-color: var(--pink); }
+
+  .mm-title { position: absolute; top: 26px; left: 28px; z-index: 7; color: #FFF6F8; }
+  .mm-title .en { font-size: 12px; letter-spacing: .34em; text-transform: uppercase; color: #F8DCE5; }
+  .mm-title h2 { font-family: var(--serif); font-size: 40px; letter-spacing: .08em; }
+  .mm-title .tip { font-size: 14.5px; color: rgba(248,220,229,.85); margin-top: 4px; }
+
+  /* 翻页卡片 */
+  .flipcard { position: absolute; z-index: 3; transform: translate(-50%, -50%); cursor: pointer; }
+  .flipcard .flip { position: relative; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.4,.1,.2,1); }
+  .flipcard.flipped .flip { transform: rotateY(180deg); }
+  .flipcard .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 12px; overflow: hidden; }
+  .flipcard .face.front { background: var(--line); }
+  .flipcard .face.front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .flipcard .face.back {
+    transform: rotateY(180deg);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 14px 15px;
+    text-align: left;
+    overflow-y: auto;
+    color: var(--ink);
+  }
+  .flipcard .face.back .b-title { font-family: var(--serif); font-size: 18px; font-weight: 600; letter-spacing: .03em; }
+  .flipcard .face.back .b-type { display: inline-block; font-size: 12.5px; color: var(--pink-deep); margin: 3px 0 10px; }
+  .flipcard .face.back .b-row { font-size: 14px; line-height: 1.55; margin-top: 5px; }
+  .flipcard .face.back .b-row b { color: var(--pink-deep); font-weight: 600; margin-right: 3px; }
+  .flipcard .editable-sheet {
+    min-height: 1.5em;
+    padding: 2px 4px 8px;
+    border-radius: 4px;
+    outline: 1px dashed transparent;
+    outline-offset: 2px;
+    cursor: text;
+    transition: background .15s ease, outline-color .15s ease;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .flipcard .editable-sheet:hover { background: rgba(240,196,119,.16); }
+  .flipcard .editable-sheet:focus {
+    background: #FFF9F0;
+    outline: 2px dashed var(--pink-deep);
+  }
+  .flipcard .editable-sheet:empty::before {
+    content: "空白页 · 点击输入";
+    color: rgba(169,128,134,.72);
+    font-size: 12px;
+    pointer-events: none;
+  }
+  .flipcard .editable-sheet .b-row {
+    margin-right: 3px;
+    padding: 1px 3px;
+    border-radius: 4px;
+  }
+  .flipcard .editable-sheet .b-row:hover { background: rgba(227,109,132,.12); }
+  .back-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: -3px 0 8px;
+    padding-bottom: 7px;
+    border-bottom: 1px dashed rgba(184,63,90,.38);
+    color: var(--pink-deep);
+    font-size: 11px;
+  }
+  .back-tools .return-photo {
+    flex: none;
+    padding: 2px 7px;
+    border: 1px solid var(--ink);
+    border-radius: 5px;
+    background: var(--sand);
+    color: var(--ink);
+    font: 600 11px var(--sans);
+    cursor: pointer;
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  #mm-center { z-index: 6; width: clamp(300px, 42vw, 460px); }
+  #mm-center .flip { aspect-ratio: 4 / 3; width: 100%; }
+  #mm-center .label { position: absolute; bottom: -36px; left: 50%; transform: translateX(-50%); color: #FFF6F8; font-family: var(--serif); font-size: 17px; letter-spacing: .06em; white-space: nowrap; }
+
+  .mm-node { z-index: 3; width: clamp(200px, 24vw, 300px); }
+  .mindmap.mm-many .mm-node { width: clamp(180px, 20vw, 250px); }
+  .mm-node .flip { aspect-ratio: 4 / 3; width: 100%; }
+  .mm-node .chip { position: absolute; bottom: -32px; left: 50%; transform: translateX(-50%); color: #FFF6F8; font-size: 14px; background: rgba(74,59,63,.82); padding: 3px 12px; border-radius: 999px; white-space: nowrap; }
+
+  @media (max-width: 720px) {
+    .mm-title h2 { font-size: 26px; }
+    .mm-gallery.is-grid {
+      top: 106px;
+      right: 12px;
+      bottom: 14px;
+      left: 12px;
+      gap: 42px 10px;
+      padding: 6px 4px 72px;
+    }
+    .mm-gallery.is-grid #mm-center { width: min(88vw, 420px); }
+    .mindmap.mm-many .mm-node,
+    .mm-gallery .mm-node { width: calc(50% - 5px); min-width: 0; }
+    body.landing .hero-title { font-size: clamp(58px, 17vw, 76px); }
+    body.landing .title-line-first { transform: translateX(-4vw) rotate(-2deg); }
+    body.landing .title-line-second { margin-top: 8px; transform: translateX(4vw) rotate(1.5deg); }
+    .landing-meta { top: 18px; left: 20px; right: 20px; font-size: 9px; }
+    .landing-meta small { font-size: 8px; }
+    .landing-stamp { top: 15%; left: 6vw; width: 62px; height: 62px; font-size: 10px; }
+    .landing-pencil { top: 20%; right: 7vw; width: 72px; }
+    .landing-copy {
+      top: auto;
+      right: 20px;
+      bottom: 220px;
+      left: 20px;
+      width: auto;
+      text-align: center;
+      transform: rotate(-1deg);
+    }
+    .landing-copy strong { font-size: 18px; }
+    .landing-copy span { margin-top: 3px; font-size: 10px; }
+    .landing-city { height: 20vh; }
+    .escape-progress { width: 92vw; bottom: 28px; }
+    .escape-progress-caption { margin: 0 26px 6px; font-size: 9px; }
+    .escape-progress-row { gap: 4px; }
+    .escape-progress-row > span { width: 25px; font-size: 9px; }
+    .escape-progress-track { height: 26px; border-width: 2px; box-shadow: 3px 3px 0 rgba(77,41,50,.88); }
+    .escape-runner { bottom: 16px; width: 112px; height: 84px; }
+    .escape-runner .runner-bubble { display: none; }
+    .landing-click { bottom: 170px; padding: 5px 12px 4px; font-size: 11px; }
+    .map-viewport {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 20px 12px 26px;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+    .map-canvas {
+      width: 760px;
+      max-width: none;
+      aspect-ratio: 4 / 3;
+      border-radius: 18px;
+    }
+    .marker .boba { width: 40px; height: 55px; bottom: 7px; }
+    .marker .m-label { top: 8px; font-size: 11px; padding: 3px 9px; }
+    .marker.marker-label-right .m-label { left: 11px; }
+    .marker.marker-jiajia .m-label { left: 4px; top: 74px; transform: translateX(-50%); font-size: 10.5px; padding: 3px 8px; }
+    .marker.marker-low .m-label { top: -4px; left: 28px; transform: none; }
+    .map-credit { left: 12px; bottom: 12px; font-size: 9px; }
+    .map-key { top: 12px; left: 12px; font-size: 9px; }
+    .map-scale { right: 12px; bottom: 12px; }
+    .station-marker .station-person { width: 42px; height: 57px; }
+    .station-marker .station-label { left: 0; top: -13px; font-size: 10px; }
+    .moving-transit { width: 48px; height: 48px; }
+    .fan-gallery { gap: 12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .escape-runner,
+    .escape-runner *,
+    .escape-progress-fill,
+    body.landing .landing-click,
+    .station-marker .station-person,
+    .moving-transit,
+    .transit-route { animation: none !important; }
+    .escape-progress-fill { transform: scaleX(1); }
+    .escape-runner { left: calc(100% - 142px); opacity: 1; }
+  }
+</style>
+</head>
+<body class="landing">
+
+  <header class="map-hero">
+    <div class="kicker">Taipei Travel Journal</div>
+    <h1 class="hero-title" id="hero-title" role="button" tabindex="0" aria-label="城市漫游指南，点击进入地图" aria-expanded="false">
+      <span class="title-line title-line-first" aria-hidden="true"><span class="title-char char-1">城</span><span class="title-char char-2">市</span></span>
+      <span class="title-line title-line-second" aria-hidden="true"><span class="title-char char-3">漫</span><span class="title-char char-4">游</span><span class="title-char char-5">指</span><span class="title-char char-6">南</span></span>
+    </h1>
+    <div class="landing-only" aria-hidden="true">
+      <div class="landing-meta">
+        <span class="meta-block"><span>Taipei / 25.03°N</span><small>城市漫游手帐</small></span>
+        <span class="meta-block"><span>Roaming issue</span><small>Vol. 01 · Weekend</small></span>
+      </div>
+      <span class="landing-stamp">城市<br>漫游中</span>
+      <span class="landing-pencil"></span>
+      <div class="landing-copy">
+        <strong>把城市留在身后，<br>去找一点风。</strong>
+        <span>一张地图 · 五个目的地 · 随时出发</span>
+      </div>
+      <svg class="landing-city" viewBox="0 0 1440 260" preserveAspectRatio="none">
+        <g stroke="#4D2932" stroke-width="3" stroke-linejoin="round">
+          <path d="M0 236 V184 H54 V137 H103 V210 H164 V165 H211 V225 H278 V146 H333 V99 H379 V188 H451 V225 H514 V174 H573 V123 H621 V210 H688 V236 Z" fill="#DB7B8E"/>
+          <path d="M815 236 V205 H868 V151 H916 V226 H982 V181 H1020 V132 H1066 V217 H1135 V236 Z" fill="#EAB7B5"/>
+          <path d="M1181 236 V211 H1215 V179 H1238 V48 L1260 70 V22 L1282 70 V101 L1309 82 V179 H1351 V219 H1412 V236 Z" fill="#D9657B"/>
+          <g fill="#FFF0DF" stroke="none" opacity=".78">
+            <rect x="35" y="195" width="9" height="16"/><rect x="69" y="151" width="9" height="16"/>
+            <rect x="118" y="162" width="9" height="16"/><rect x="230" y="177" width="9" height="16"/>
+            <rect x="350" y="119" width="9" height="16"/><rect x="536" y="188" width="9" height="16"/>
+            <rect x="897" y="167" width="9" height="16"/><rect x="1038" y="148" width="9" height="16"/>
+            <rect x="1250" y="108" width="9" height="16"/><rect x="1293" y="126" width="9" height="16"/>
+          </g>
+        </g>
+      </svg>
+      <div class="escape-progress">
+        <div class="escape-progress-caption"><span>漫游进度 / Roaming progress</span><span>City → Wild</span></div>
+        <div class="escape-progress-row">
+          <span>0%</span>
+          <div class="escape-progress-track">
+            <div class="escape-progress-fill"></div>
+            <div class="escape-runner">
+              <span class="runner-bubble">先走一步！</span>
+              <svg viewBox="0 0 190 140">
+                <g fill="none" stroke="#4D2932" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 74 L46 66 M1 92 L37 86 M18 112 L54 105" stroke="#D9657B" stroke-width="4"/>
+                  <ellipse cx="92" cy="128" rx="64" ry="5" fill="#4D2932" stroke="none" opacity=".14"/>
+
+                  <!-- Suitcase with an upright telescopic handle -->
+                  <g class="runner-suitcase">
+                    <path d="M126 59 V86" stroke-width="4"/>
+                    <path d="M119 58 H133" stroke-width="6"/>
+                    <rect x="106" y="84" width="43" height="43" rx="7" fill="#F0C477"/>
+                    <path d="M113 90 H142" stroke-width="2"/>
+                    <rect x="114" y="98" width="10" height="7" rx="2" fill="#E36D84" stroke-width="1.6"/>
+                    <circle cx="116" cy="128" r="4.5" fill="#4D2932"/>
+                    <circle cx="141" cy="128" r="4.5" fill="#4D2932"/>
+                  </g>
+
+                  <!-- Alternating legs pivot from separate hips -->
+                  <g class="runner-leg-back">
+                    <path d="M71 82 L66 102 L62 122" stroke-width="9"/>
+                    <path d="M62 122 L78 123" stroke-width="7"/>
+                  </g>
+                  <g class="runner-leg-front">
+                    <path d="M78 82 L84 102 L92 122" stroke-width="9"/>
+                    <path d="M92 122 L108 121" stroke-width="7"/>
+                  </g>
+
+                  <!-- Backpack and body -->
+                  <path d="M55 54 Q44 67 51 86 L69 90 Q66 70 75 55 Z" fill="#F0C477"/>
+                  <path d="M58 55 Q78 46 94 61 L89 91 Q71 98 57 88 Z" fill="#E36D84"/>
+
+                  <!-- Free arm swings; the other arm reaches to the handle -->
+                  <g class="runner-free-arm">
+                    <path d="M65 63 Q54 74 53 88" stroke-width="7"/>
+                    <circle cx="53" cy="90" r="5" fill="#FFE8D8"/>
+                  </g>
+                  <path d="M90 63 Q105 67 126 75" stroke-width="7"/>
+
+                  <circle cx="86" cy="38" r="17" fill="#FFE8D8"/>
+                  <path d="M70 35 Q76 13 94 20 Q105 24 102 40 Q88 32 70 35 Z" fill="#7A4655"/>
+                  <circle cx="94" cy="38" r="2.2" fill="#4D2932" stroke="none"/>
+                  <path d="M91 45 Q97 48 101 43" stroke-width="2"/>
+
+                  <!-- Hand grips the vertical handle at its midpoint -->
+                  <circle cx="126" cy="76" r="6" fill="#FFE8D8"/>
+                  <path d="M122 74 Q126 78 130 74" stroke-width="1.8"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <span>100%</span>
+        </div>
+      </div>
+    </div>
+    <p class="landing-click landing-only">点击标题 · 开始漫游</p>
+    <p class="subtitle">台北漫游手帐 · 把回忆钉在地图上</p>
+
+    <div class="map-viewport">
+      <div class="map-canvas" id="map-canvas">
+        <img class="clean-map-image" src="assets/img/map/taipei-comic-basemap.jpg?v=2" alt="按真实地理数据重绘的台北与东北角手绘漫画地图">
+        <svg class="map-annotations" viewBox="0 0 1000 750" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M910 221 L730 411" fill="none" stroke="#FFF8EC" stroke-width="8" stroke-linecap="round"/>
+          <path d="M910 221 L730 411" fill="none" stroke="#B83F5A" stroke-width="3" stroke-dasharray="8 9" stroke-linecap="round"/>
+          <g fill="#FFF8EC" stroke="#4D2932" stroke-width="2.5">
+            <circle cx="910" cy="221" r="6"/>
+            <circle cx="730" cy="411" r="6"/>
+          </g>
+        </svg>
+        <svg class="transit-layer" id="transit-layer" aria-hidden="true">
+          <path class="transit-route-shadow" id="transit-route-shadow"></path>
+          <path class="transit-route" id="transit-route"></path>
+        </svg>
+        <div class="map-key" aria-label="地图图例"><span><i class="key-water"></i>主要河流</span><span><i class="key-road"></i>主干道</span></div>
+        <div class="map-credit"><b>地理数据</b> © Esri, HERE, Garmin, © OpenStreetMap contributors<br>主干道与河流按真实数据重绘 · 点位采用 GPS 投影</div>
+        <div class="map-scale" aria-label="比例尺约十公里"><span>0</span><i></i><span>10 km</span></div>
+        <div class="fan" id="fan"></div>
+      </div>
+    </div>
+
+    <p class="map-hint">悬浮<b>九份 · 十分</b>看看巴士动画，或<b>点击</b>走进回忆</p>
+  </header>
+
+  <footer>城市漫游指南 · 台北漫游手帐 &nbsp;|&nbsp; 内容为个人旅行记录，未完待续</footer>
+
+  <!-- 思维导图浮层 -->
+  <div class="mindmap" id="mindmap">
+    <div class="mm-backdrop" data-close></div>
+    <svg class="mm-svg" id="mm-svg"></svg>
+    <div class="mm-gallery" id="mm-gallery"></div>
+    <button class="mm-close" data-close aria-label="关闭">✕</button>
+    <div class="mm-title">
+      <div class="en">Taipei</div>
+      <h2 id="mm-name"></h2>
+      <div class="tip" id="mm-tip"></div>
+    </div>
+  </div>
+
+<script>
+  // ===== 标题单字跟随鼠标 =====
+  (function initTitleMotion() {
+    var title = document.getElementById("hero-title");
+    if (!title) return;
+    var chars = Array.prototype.slice.call(title.querySelectorAll(".title-char"));
+    var pointerX = -9999, pointerY = -9999;
+    var frame = null;
+    var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function renderTitle() {
+      frame = null;
+      var radius = Math.max(170, Math.min(260, window.innerWidth * 0.22));
+      chars.forEach(function (char) {
+        var rect = char.getBoundingClientRect();
+        var dx = pointerX - (rect.left + rect.width / 2);
+        var dy = pointerY - (rect.top + rect.height / 2);
+        var distance = Math.sqrt(dx * dx + dy * dy);
+        var influence = reducedMotion ? 0 : Math.max(0, 1 - distance / radius);
+        influence *= influence;
+        var scale = 1 + influence * 0.3;
+        var lift = influence * -9;
+        var tilt = influence * Math.max(-5, Math.min(5, dx / radius * 6));
+        char.style.transform = "translate3d(0," + lift.toFixed(2) + "px,0) scale(" + scale.toFixed(3) + ") rotate(" + tilt.toFixed(2) + "deg)";
+        char.classList.toggle("is-near", influence > 0.18);
+      });
+    }
+
+    function scheduleTitle() {
+      if (frame === null) frame = requestAnimationFrame(renderTitle);
+    }
+
+    function resetTitle() {
+      pointerX = -9999;
+      pointerY = -9999;
+      scheduleTitle();
+    }
+
+    window.addEventListener("pointermove", function (event) {
+      if (event.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      scheduleTitle();
+    }, { passive: true });
+    window.addEventListener("scroll", scheduleTitle, { passive: true });
+    window.addEventListener("blur", resetTitle);
+    document.documentElement.addEventListener("mouseleave", resetTitle);
+
+    function enterMap() {
+      if (!document.body.classList.contains("landing")) return;
+      document.body.classList.remove("landing");
+      title.setAttribute("aria-expanded", "true");
+      title.setAttribute("aria-label", "城市漫游指南");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      scheduleTitle();
+    }
+    title.addEventListener("click", enterMap);
+    title.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        enterMap();
+      }
+    });
+  })();
+
+  // ===== 台北点位（经纬度来自各地点的真实位置）=====
+  var MAP_BOUNDS = { west: 121.490, east: 121.880, south: 24.922, north: 25.188 };
+  function mercatorY(lat) {
+    return Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
+  }
+  function projectGeo(lat, lng) {
+    return {
+      x: (lng - MAP_BOUNDS.west) / (MAP_BOUNDS.east - MAP_BOUNDS.west) * 100,
+      y: (mercatorY(MAP_BOUNDS.north) - mercatorY(lat)) /
+        (mercatorY(MAP_BOUNDS.north) - mercatorY(MAP_BOUNDS.south)) * 100
+    };
+  }
+
+  var SPOTS = [
+    { id: "palace", name: "国立故宫博物院", type: "景点", lat: 25.102355, lng: 121.548536,
+      transport: "捷运士林站转公车", time: "上午或下午", feeling: "【待你补充】", cost: "门票 NT$350",
+      imgs: [
+        "assets/img/spots/palace-museum/palace-01.jpg?v=2",
+        "assets/img/spots/palace-museum/palace-02.jpg?v=2",
+        "assets/img/spots/palace-museum/palace-03.jpg?v=2",
+        "assets/img/spots/palace-museum/palace-04.jpg?v=2"
+      ] },
+    // 九份与十分分别位于两端；地图中的单颗奶茶标记取两地路线中点。
+    { id: "jiufen-shifen", name: "九份 · 十分", type: "景点", lat: 25.0759, lng: 121.80975,
+      transport: "台铁到瑞芳，九份转公车 / 十分走平溪线", time: "下午到天黑看夜景", feeling: "【待你补充】", cost: "交通 + 天灯约 NT$400",
+      imgs: [
+        "assets/img/spots/jiufen-shifen/jiufen-01.jpg?v=2",
+        "assets/img/spots/jiufen-shifen/shifen-01.jpg?v=2",
+        "assets/img/spots/jiufen-shifen/shifen-02.jpg?v=2",
+        "assets/img/spots/jiufen-shifen/shifen-03.jpg?v=2",
+        "assets/img/spots/jiufen-shifen/shifen-04.jpg?v=2"
+      ] },
+    { id: "pop-music-center", name: "台北流行音乐中心", type: "展览 · 景点", lat: 25.052050, lng: 121.595370,
+      transport: "捷运板南线「昆阳站」", time: "看展览时段", feeling: "【待你补充】", cost: "依展览而定",
+      imgs: [
+        "assets/img/spots/pop-music-center/music-01.jpg?v=2",
+        "assets/img/spots/pop-music-center/music-02.jpg?v=2",
+        "assets/img/spots/pop-music-center/music-03.jpg?v=2",
+        "assets/img/spots/pop-music-center/music-04.jpg?v=2",
+        "assets/img/spots/pop-music-center/music-05.jpg?v=2",
+        "assets/img/spots/pop-music-center/music-06.jpg?v=2",
+        "assets/img/spots/pop-music-center/music-07.jpg?v=3"
+      ] },
+    { id: "jiajia-records", name: "佳佳唱片行", type: "唱片行 · 景点", lat: 25.045300, lng: 121.506900,
+      transport: "捷运板南线／松山新店线「西门站」6号出口，步行约5分钟", time: "营业时间内", feeling: "【待你补充】", cost: "免费入场",
+      imgs: [
+        "assets/img/spots/jiajia-records/jiajia-01.jpg?v=1",
+        "assets/img/spots/jiajia-records/jiajia-02.jpg?v=1",
+        "assets/img/spots/jiajia-records/jiajia-03.jpg?v=1",
+        "assets/img/spots/jiajia-records/jiajia-04.jpg?v=1"
+      ] },
+    { id: "ntu", name: "台湾大学", type: "校园 · 景点", lat: 25.017438, lng: 121.533556,
+      transport: "捷运松山新店线「公馆站」", time: "白天", feeling: "【待你补充】", cost: "免费",
+      imgs: [
+        "assets/img/spots/ntu/ntu-01.jpg?v=2",
+        "assets/img/spots/ntu/ntu-02.jpg?v=2",
+        "assets/img/spots/ntu/ntu-03.jpg?v=2",
+        "assets/img/spots/ntu/ntu-04.jpg?v=2",
+        "assets/img/spots/ntu/ntu-05.jpg?v=2",
+        "assets/img/spots/ntu/ntu-06.jpg?v=2"
+      ] }
+  ];
+
+  SPOTS.forEach(function (spot) { spot.pos = projectGeo(spot.lat, spot.lng); });
+
+  // 背面文案支持直接编辑，并按地点保存在当前浏览器中。
+  var EDIT_KEY = "taipei-travel-journal-copy-v1";
+  var EDIT_FIELDS = ["name", "type", "transport", "time", "feeling", "cost"];
+  function loadSpotEdits() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(EDIT_KEY) || "{}");
+      SPOTS.forEach(function (spot) {
+        var row = saved[spot.id];
+        if (!row) return;
+        EDIT_FIELDS.forEach(function (key) {
+          if (typeof row[key] === "string") spot[key] = row[key];
+        });
+      });
+    } catch (err) {
+      console.warn("无法读取已保存的文字，将使用页面默认内容。", err);
+    }
+  }
+  var CARD_EDIT_KEY = "taipei-travel-journal-card-edits-v2";
+  var cardEdits = {};
+  try { cardEdits = JSON.parse(localStorage.getItem(CARD_EDIT_KEY) || "{}"); }
+  catch (err) { cardEdits = {}; }
+  function getCardHTML(key) {
+    return typeof cardEdits[key] === "string" ? cardEdits[key] : null;
+  }
+  function saveCardHTML(key, html) {
+    cardEdits[key] = html;
+    try { localStorage.setItem(CARD_EDIT_KEY, JSON.stringify(cardEdits)); }
+    catch (err) { console.warn("无法保存当前照片的编辑内容。", err); }
+  }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+    });
+  }
+  loadSpotEdits();
+
+  var BOBA = '<svg class="boba" viewBox="0 0 64 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M43 4 L34 32" stroke="#4D2932" stroke-width="8.5" stroke-linecap="round"/>' +
+    '<path d="M43 4 L34 32" stroke="#E36D84" stroke-width="5" stroke-linecap="round"/>' +
+    '<path d="M42 7 L38 19" stroke="#FFE8DC" stroke-width="1.7" stroke-linecap="round" opacity=".9"/>' +
+    '<rect x="9.5" y="23" width="45" height="8" rx="4" fill="#FFF1E4" stroke="#4D2932" stroke-width="2.8"/>' +
+    '<path d="M12 31 H52 L48 79.5 Q47.5 84 43 84 H21 Q16.5 84 16 79.5 Z" fill="#FFF1E4" stroke="#4D2932" stroke-width="3" stroke-linejoin="round"/>' +
+    '<path d="M16.2 45 H47.8 L45.2 77 Q44.9 80.5 41.5 80.5 H22.5 Q19.1 80.5 18.8 77 Z" fill="#D9828B"/>' +
+    '<path d="M17 46 C22 42.5 28 48 33 44.5 C37 41.8 43 43.5 47 46.5 L46.3 56 H17.7 Z" fill="#F3C1AC" opacity=".9"/>' +
+    '<path d="M9.5 27 Q32 14.5 54.5 27" stroke="#E36D84" stroke-width="3" stroke-linecap="round"/>' +
+    '<circle cx="24.5" cy="60" r="2.5" fill="#4D2932"/><circle cx="40" cy="60" r="2.5" fill="#4D2932"/>' +
+    '<path d="M28.8 66 Q32.5 69.4 36.3 66" stroke="#4D2932" stroke-width="2" stroke-linecap="round"/>' +
+    '<ellipse cx="20.8" cy="66" rx="3.2" ry="1.8" fill="#D34E72" opacity=".62"/><ellipse cx="43.7" cy="66" rx="3.2" ry="1.8" fill="#D34E72" opacity=".62"/>' +
+    '<g fill="#4D2932"><circle cx="21.5" cy="76.2" r="3"/><circle cx="28" cy="77.4" r="3"/><circle cx="34.5" cy="77" r="3"/><circle cx="41.5" cy="75.7" r="2.8"/></g>' +
+    '<path d="M14 34 Q15.5 54 17 70" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity=".4"/>' +
+    '</svg>';
+
+  var TRAVELER = '<svg class="station-person" viewBox="0 0 64 86" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<ellipse cx="32" cy="81" rx="22" ry="4" fill="#4D2932" opacity=".16"/>' +
+    '<path d="M24 58 L21 79 M40 58 L44 79" stroke="#4D2932" stroke-width="7" stroke-linecap="round"/>' +
+    '<path d="M17 79 H26 M40 79 H50" stroke="#4D2932" stroke-width="5" stroke-linecap="round"/>' +
+    '<path d="M20 36 Q32 28 44 36 L49 58 Q33 66 16 58 Z" fill="#E36D84" stroke="#4D2932" stroke-width="3" stroke-linejoin="round"/>' +
+    '<path d="M18 39 L10 53 M46 39 L55 51" stroke="#4D2932" stroke-width="6" stroke-linecap="round"/>' +
+    '<circle cx="32" cy="22" r="13" fill="#FFE8D8" stroke="#4D2932" stroke-width="3"/>' +
+    '<path d="M20 21 C20 7 43 6 46 20 C39 16 31 18 20 21 Z" fill="#7A4655" stroke="#4D2932" stroke-width="2.5"/>' +
+    '<circle cx="27" cy="23" r="1.8" fill="#4D2932"/><circle cx="37" cy="23" r="1.8" fill="#4D2932"/>' +
+    '<path d="M28.5 29 Q32 32 35.5 29" stroke="#4D2932" stroke-width="1.8" stroke-linecap="round"/>' +
+    '<rect x="47" y="55" width="12" height="21" rx="3" fill="#F0C477" stroke="#4D2932" stroke-width="2.5"/>' +
+    '<path d="M49 55 Q50 51 53 51" stroke="#4D2932" stroke-width="2" stroke-linecap="round"/>' +
+    '<circle cx="52" cy="74" r="1.4" fill="#4D2932"/>' +
+    '</svg>';
+  var BUS = '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<circle cx="32" cy="31" r="27" fill="#FFF5E8" stroke="#4D2932" stroke-width="3"/>' +
+    '<rect x="12" y="16" width="40" height="34" rx="7" fill="#F0C477" stroke="#4D2932" stroke-width="3"/>' +
+    '<rect x="18" y="21" width="12" height="11" rx="3" fill="#A9DCD3" stroke="#4D2932" stroke-width="2"/>' +
+    '<rect x="34" y="21" width="12" height="11" rx="3" fill="#A9DCD3" stroke="#4D2932" stroke-width="2"/>' +
+    '<path d="M18 39 H46" stroke="#4D2932" stroke-width="2" stroke-linecap="round"/>' +
+    '<circle cx="21" cy="51" r="5" fill="#4D2932"/><circle cx="43" cy="51" r="5" fill="#4D2932"/>' +
+    '<circle cx="21" cy="51" r="2" fill="#FFF5E8"/><circle cx="43" cy="51" r="2" fill="#FFF5E8"/>' +
+    '</svg>';
+
+  var canvas = document.getElementById("map-canvas");
+  var fan = document.getElementById("fan");
+  var fanTimer = null;
+  var transitTimer = null;
+  var transitFrame = null;
+  var transitLayer = document.getElementById("transit-layer");
+  var transitRoute = document.getElementById("transit-route");
+  var transitRouteShadow = document.getElementById("transit-route-shadow");
+  var movingTransit = document.createElement("div");
+  movingTransit.className = "moving-transit";
+  movingTransit.setAttribute("aria-hidden", "true");
+  canvas.appendChild(movingTransit);
+
+  var STATION = { name: "台北车站", lat: 25.04776, lng: 121.51704 };
+  STATION.pos = projectGeo(STATION.lat, STATION.lng);
+  var station = document.createElement("div");
+  station.className = "station-marker";
+  station.dataset.spotId = "taipei-main-station";
+  station.style.left = STATION.pos.x + "%";
+  station.style.top = STATION.pos.y + "%";
+  station.title = STATION.name + " · " + STATION.lat.toFixed(5) + ", " + STATION.lng.toFixed(5);
+  station.innerHTML = TRAVELER + '<span class="station-dot" aria-hidden="true"></span><span class="station-label">台北车站</span>';
+  canvas.appendChild(station);
+
+  SPOTS.forEach(function (spot, idx) {
+    var m = document.createElement("div");
+    m.className = "marker";
+    m.dataset.spotId = spot.id;
+    if (spot.id === "pop-music-center") m.classList.add("marker-label-right");
+    if (spot.id === "jiajia-records") m.classList.add("marker-jiajia");
+    if (spot.id === "ntu") m.classList.add("marker-low");
+    m.style.left = spot.pos.x + "%";
+    m.style.top = spot.pos.y + "%";
+    m.title = spot.name + " · " + spot.lat.toFixed(5) + ", " + spot.lng.toFixed(5);
+    m.innerHTML = BOBA + '<span class="spot-dot" aria-hidden="true"></span><div class="m-label">' + escapeHTML(spot.name) + '</div>';
+    m.addEventListener("click", function () { openMindmap(idx); });
+    m.addEventListener("mouseover", function (e) {
+      if (m.contains(e.relatedTarget)) return;
+      showFan(idx, m);
+      if (spot.id === "jiufen-shifen") showTransit(idx);
+    });
+    m.addEventListener("mouseout", function (e) {
+      if (m.contains(e.relatedTarget)) return;
+      scheduleHideFan();
+      scheduleHideTransit();
+    });
+    canvas.appendChild(m);
+  });
+
+  // ===== 悬停扇出缩略图 =====
+  function showFan(idx, marker) {
+    clearTimeout(fanTimer);
+    var spot = SPOTS[idx];
+    var crect = canvas.getBoundingClientRect();
+    var mcx = crect.width * spot.pos.x / 100;
+    var mcy = crect.height * spot.pos.y / 100;
+    var n = spot.imgs.length;
+    var compact = crect.width < 720;
+    var isNTU = spot.id === "ntu";
+    var cols = Math.min(n, isNTU ? 3 : (compact ? 2 : 4));
+    var gap = compact ? 12 : 16;
+    var edgePad = 8;
+    var padding = 0;
+    var TH = compact
+      ? Math.min(118, (crect.width - edgePad * 2 - padding * 2 - gap) / 2)
+      : Math.min(138, (crect.width - edgePad * 2 - padding * 2 - gap * 3) / 4);
+    if (isNTU) {
+      var availableBelow = crect.height - edgePad - (mcy + 46);
+      var heightPerThumb = Math.max(72, (availableBelow - (Math.ceil(n / cols) - 1) * gap - padding * 2) / (Math.ceil(n / cols) * 0.75));
+      TH = Math.min(TH, heightPerThumb);
+    }
+    var rows = Math.ceil(n / cols);
+    var galleryW = cols * TH + (cols - 1) * gap;
+    var galleryH = rows * TH * 0.75 + (rows - 1) * gap;
+    var left = Math.max(edgePad + galleryW / 2, Math.min(crect.width - edgePad - galleryW / 2, mcx));
+    var top = mcy + (isNTU ? 82 : (spot.id === "jiajia-records" ? 144 : 46));
+    if (!isNTU && top + galleryH > crect.height - edgePad) {
+      top = Math.max(edgePad, mcy - 100 - galleryH);
+    }
+    var html = '<div class="fan-gallery" style="left:' + left + 'px;top:' + top + 'px;width:' + galleryW + 'px;grid-template-columns:repeat(' + cols + ',' + TH + 'px)">';
+    for (var i = 0; i < n; i++) {
+      var tilt = i % 2 ? 1.8 : -1.6;
+      html += '<img class="thumb" src="' + spot.imgs[i] + '" alt="' + escapeHTML(spot.name) + ' 第 ' + (i + 1) + ' 张照片" style="transform:rotate(' + tilt + 'deg)">';
+    }
+    html += '</div>';
+    fan.classList.remove("show");
+    fan.innerHTML = html;
+    requestAnimationFrame(function () {
+      fan.classList.add("show");
+    });
+  }
+  function scheduleHideFan() { fanTimer = setTimeout(hideFan, 160); }
+  function hideFan() { fan.classList.remove("show"); }
+
+  // ===== 台北车站 → 点位公共交通动画 =====
+  function showTransit(idx) {
+    var spot = SPOTS[idx];
+    if (!spot) return;
+    clearTimeout(transitTimer);
+    if (transitFrame !== null) cancelAnimationFrame(transitFrame);
+
+    var W = canvas.clientWidth, H = canvas.clientHeight;
+    var startX = W * STATION.pos.x / 100;
+    var startY = H * STATION.pos.y / 100;
+    var endX = W * spot.pos.x / 100;
+    var endY = H * spot.pos.y / 100;
+    var dx = endX - startX;
+    var distance = Math.sqrt(dx * dx + Math.pow(endY - startY, 2));
+    var bend = Math.max(34, Math.min(105, distance * 0.13));
+    var controlX = (startX + endX) / 2 + dx * 0.08;
+    var controlY = Math.min(startY, endY) - bend;
+    var pathData = "M " + startX + " " + startY + " Q " + controlX + " " + controlY + " " + endX + " " + endY;
+
+    transitLayer.setAttribute("viewBox", "0 0 " + W + " " + H);
+    transitRoute.setAttribute("d", pathData);
+    transitRouteShadow.setAttribute("d", pathData);
+    transitLayer.classList.add("is-visible");
+    movingTransit.innerHTML = BUS;
+    movingTransit.classList.remove("is-arrived", "is-visible");
+    var transitSize = movingTransit.offsetWidth || 58;
+    var transitHalf = transitSize / 2;
+    movingTransit.style.transform = "translate3d(" + (startX - transitHalf) + "px," + (startY - transitHalf) + "px,0)";
+
+    var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var length = transitRoute.getTotalLength();
+    var duration = Math.max(3000, Math.min(4600, 2300 + length * 1.55));
+    var began = null;
+
+    requestAnimationFrame(function () { movingTransit.classList.add("is-visible"); });
+    function step(now) {
+      if (began === null) began = now;
+      var progress = reducedMotion ? 1 : Math.min(1, (now - began) / duration);
+      var eased = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      var point = transitRoute.getPointAtLength(length * eased);
+      movingTransit.style.transform = "translate3d(" + (point.x - transitHalf) + "px," + (point.y - transitHalf) + "px,0)";
+      if (progress < 1) {
+        transitFrame = requestAnimationFrame(step);
+      } else {
+        transitFrame = null;
+        movingTransit.classList.add("is-arrived");
+      }
+    }
+    transitFrame = requestAnimationFrame(step);
+  }
+
+  function scheduleHideTransit() {
+    clearTimeout(transitTimer);
+    transitTimer = setTimeout(hideTransit, 420);
+  }
+  function hideTransit() {
+    clearTimeout(transitTimer);
+    if (transitFrame !== null) cancelAnimationFrame(transitFrame);
+    transitFrame = null;
+    transitLayer.classList.remove("is-visible");
+    movingTransit.classList.remove("is-visible", "is-arrived");
+  }
+
+  // ===== 思维导图 + 翻页卡片 =====
+  var mm = document.getElementById("mindmap");
+  var mmSvg = document.getElementById("mm-svg");
+  var mmGallery = document.getElementById("mm-gallery");
+  var cards = [];
+  var center = null;
+  mmGallery.addEventListener("click", function (event) {
+    if (event.target === mmGallery) closeMindmap();
+  });
+
+  function openMindmap(idx) {
+    var spot = SPOTS[idx]; if (!spot) return;
+    hideTransit();
+    document.getElementById("mm-name").textContent = spot.name;
+    document.getElementById("mm-tip").textContent = "点击照片翻面；背面文字可直接修改并自动保存";
+
+    mmGallery.querySelectorAll(".flipcard").forEach(function (n) { n.remove(); });
+    cards = [];
+
+    center = makeFlipCard(spot, spot.imgs[0], "center", spot.name, 0);
+    mmGallery.appendChild(center.el);
+    cards.push(center);
+
+    spot.imgs.slice(1).forEach(function (img, imageIndex) {
+      var node = makeFlipCard(spot, img, "node", spot.name, imageIndex + 1);
+      mmGallery.appendChild(node.el);
+      cards.push(node);
+    });
+
+    mm.classList.toggle("mm-many", cards.length - 1 >= 4);
+    mmGallery.classList.toggle("is-grid", mm.clientWidth <= 720);
+    mm.classList.add("open");
+    document.body.classList.add("no-scroll");
+    mmGallery.scrollTop = 0;
+    layout();
+  }
+
+  function makeFlipCard(spot, img, kind, label, photoIndex) {
+    var el = document.createElement("div");
+    el.className = "flipcard " + (kind === "center" ? "" : "mm-node");
+    if (kind === "center") el.id = "mm-center";
+    el.dataset.spotId = spot.id;
+    var cardKey = spot.id + "::" + photoIndex;
+    el.dataset.cardKey = cardKey;
+    el.innerHTML =
+      '<div class="flip">' +
+        '<div class="face front"><img src="' + img + '" alt="' + escapeHTML(spot.name) + '"></div>' +
+        '<div class="face back">' +
+          '<div class="back-tools"><span class="edit-note">✎ 图 ' + String(photoIndex + 1).padStart(2, "0") + ' 独立编辑 · 自动保存</span><button type="button" class="return-photo">回到照片</button></div>' +
+          '<div class="editable-sheet" contenteditable="true" spellcheck="false" aria-label="第 ' + (photoIndex + 1) + ' 张图片的独立文字内容">' +
+            '<div class="b-title">' + escapeHTML(spot.name) + '</div>' +
+            '<div class="b-type">' + escapeHTML(spot.type) + '</div>' +
+            '<div class="b-row"><b>🚇</b> ' + escapeHTML(spot.transport) + '</div>' +
+            '<div class="b-row"><b>🕐</b> ' + escapeHTML(spot.time) + '</div>' +
+            '<div class="b-row"><b>💭</b> ' + escapeHTML(spot.feeling) + '</div>' +
+            '<div class="b-row"><b>💰</b> ' + escapeHTML(spot.cost) + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      (kind === "center" ? '<div class="label">' + escapeHTML(label) + '</div>' : '<div class="chip">' + escapeHTML(label) + '</div>');
+    var card = { el: el, spot: spot };
+    var editable = el.querySelector(".editable-sheet");
+    var savedHTML = getCardHTML(cardKey);
+    if (savedHTML !== null) editable.innerHTML = savedHTML;
+    el.querySelector(".return-photo").addEventListener("click", function (e) {
+      e.stopPropagation();
+      el.classList.remove("flipped");
+    });
+    el.addEventListener("click", function (e) {
+      if (e.target.closest("[contenteditable], .return-photo")) return;
+      el.classList.toggle("flipped");
+    });
+    bindCardEditor(el, cardKey);
+    return card;
+  }
+
+  function bindCardEditor(el, cardKey) {
+    var sheet = el.querySelector(".editable-sheet");
+    var note = el.querySelector(".edit-note");
+    sheet.addEventListener("click", function (e) { e.stopPropagation(); });
+    sheet.addEventListener("paste", function (e) {
+      e.preventDefault();
+      var text = (e.clipboardData || window.clipboardData).getData("text/plain");
+      document.execCommand("insertText", false, text);
+    });
+    sheet.addEventListener("input", function () {
+      saveCardHTML(cardKey, sheet.innerHTML);
+      note.textContent = "✓ 本图已自动保存";
+      clearTimeout(note._saveTimer);
+      note._saveTimer = setTimeout(function () {
+        var number = el.dataset.cardKey.split("::")[1];
+        note.textContent = "✎ 图 " + String(Number(number) + 1).padStart(2, "0") + " 独立编辑 · 自动保存";
+      }, 1100);
+    });
+  }
+
+  function layout() {
+    mmSvg.innerHTML = "";
+    var viewportW = mm.clientWidth;
+    var viewportH = mm.clientHeight;
+    var useGrid = viewportW <= 720 || viewportH < 560;
+    mmGallery.classList.toggle("is-grid", useGrid);
+
+    cards.forEach(function (card) {
+      card.el.style.left = "";
+      card.el.style.top = "";
+      card.el.style.width = "";
+      card.el.style.transform = "";
+    });
+    if (useGrid) return;
+
+    var safe = { left: 24, right: 24, top: 126, bottom: 54 };
+    var nodeGap = 46;
+    var sideGap = 34;
+    var nodeCount = cards.length - 1;
+    var maxPerSide = Math.ceil(nodeCount / 2);
+    var availableHeight = viewportH - safe.top - safe.bottom;
+    var maxNodeHeight = (availableHeight - 10 - nodeGap * Math.max(0, maxPerSide - 1)) / Math.max(1, maxPerSide);
+    var centerW = Math.min(340, viewportW * 0.29, viewportH * 0.40);
+    var nodeW = Math.min(190, viewportW * 0.15, maxNodeHeight / 0.75);
+    centerW = Math.max(220, centerW);
+    nodeW = Math.max(104, nodeW);
+    center.el.style.width = centerW + "px";
+    cards.slice(1).forEach(function (card) { card.el.style.width = nodeW + "px"; });
+
+    var centerRect = center.el.getBoundingClientRect();
+    var nodeRect = cards.length > 1 ? cards[1].el.getBoundingClientRect() : centerRect;
+    var centerH = centerRect.height;
+    var nodeH = nodeRect.height;
+    var fanHalfWidth = centerW / 2 + sideGap + nodeW;
+    var anchorX = viewportW / 2;
+    var anchorY = viewportH / 2;
+    var leftX = anchorX - centerW / 2 - sideGap - nodeW / 2;
+    var rightX = anchorX + centerW / 2 + sideGap + nodeW / 2;
+    var tilts = [-2.7, 2.5, -1.8, 3.1, -2.2, 2.9];
+
+    center.el.style.left = anchorX + "px";
+    center.el.style.top = anchorY + "px";
+    center.el.style.transform = "translate(-50%, -50%) rotate(-1.5deg)";
+
+    function placeCards(sideCards, x, offset) {
+      var stackHeight = sideCards.length * nodeH + Math.max(0, sideCards.length - 1) * nodeGap;
+      var startY = Math.max(safe.top, Math.min(anchorY - stackHeight / 2, viewportH - safe.bottom - stackHeight));
+      sideCards.forEach(function (card, index) {
+        var y = startY + nodeH / 2 + index * (nodeH + nodeGap);
+        card.el.style.left = x + "px";
+        card.el.style.top = y + "px";
+        card.el.style.transform = "translate(-50%, -50%) rotate(" + tilts[(offset + index) % tilts.length] + "deg)";
+      });
+    }
+
+    var leftCards = cards.slice(1).filter(function (card, index) { return index % 2 === 0; });
+    var rightCards = cards.slice(1).filter(function (card, index) { return index % 2 === 1; });
+    placeCards(leftCards, leftX, 0);
+    placeCards(rightCards, rightX, 1);
+  }
+
+  function closeMindmap() {
+    mm.classList.remove("open");
+    document.body.classList.remove("no-scroll");
+  }
+
+  document.querySelectorAll("[data-close]").forEach(function (el) { el.addEventListener("click", closeMindmap); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (document.activeElement && document.activeElement.isContentEditable) {
+      document.activeElement.blur();
+      return;
+    }
+    closeMindmap();
+  });
+  window.addEventListener("resize", function () { if (mm.classList.contains("open")) layout(); });
+</script>
+
+</body>
+</html>
